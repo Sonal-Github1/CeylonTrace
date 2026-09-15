@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String        @id @default(uuid())
+  name           String
+  email          String        @unique
+  passwordHash   String
+  travelStyle    String?       // Solo, Friends, Family
+  createdAt      DateTime      @default(now())
+
+  favorites      Destination[] @relation("UserFavorites")
+  itineraries    Itinerary[]
+}
+
+model Destination {
+  id             String        @id @default(uuid())
+  name           String
+  description    String?
+  latitude       Float         
+  longitude      Float
+  categoryTags   String[]      
+  budgetLevel    Int           
+  bestSeason     String        
+
+  favoritedBy    User[]        @relation("UserFavorites")
+  itineraryStops ItineraryStop[]
+}
+
+model Itinerary {
+  id             String        @id @default(uuid())
+  title          String
+  groupType      String        
+  createdAt      DateTime      @default(now())
+
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  stops          ItineraryStop[]
+}
+
+model ItineraryStop {
+  id             String        @id @default(uuid())
+  dayNumber      Int           
+  stopOrder      Int           
+
+  itineraryId    String
+  itinerary      Itinerary     @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  destinationId  String
+  destination    Destination   @relation(fields: [destinationId], references: [id])
+}
